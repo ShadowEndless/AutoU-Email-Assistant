@@ -4,7 +4,7 @@ Solução simples (FastAPI + HTML) para **classificar emails** em *Produtivo* ou
 Funciona **100% local** com um **classificador por regras** e pode ficar mais inteligente ao **conectar a API do Hugging Face Inference** (opcional).
 
 > 🇧🇷 **Linguagem:** Interface PT-BR, regras PT/EN.  
-> ⚙️ **Stack:** FastAPI, Vanilla HTML+JS (Tailwind), opcional Hugging Face Inference API.  
+> ⚙️ **Stack:** FastAPI, Vanilla HTML+JS (Tailwind), SQLite, opcional Hugging Face Inference API.  
 > ☁️ **Deploy sugerido:** Render (free).
 
 ---
@@ -36,6 +36,9 @@ Funciona **100% local** com um **classificador por regras** e pode ficar mais in
 5. **Usar**
    - Abra: http://127.0.0.1:8000  
    - Cole texto ou envie `.txt/.pdf`. Veja a **categoria** e a **resposta sugerida**, com botão para copiar.
+
+6. **Resposta**
+   - Resposta compativel com markdown.
 
 ---
 
@@ -83,9 +86,15 @@ AutoU-Email-Assistant/
 ├── frontend/
 │   └── index.html            # UI HTML + Tailwind + fetch API
 ├── sample_data/
-│   ├── email_status.txt
-│   ├── email_feliz_natal.txt
-│   └── email_anexo.pdf       # (placeholder explicativo)
+│   ├── emails_improdutivos/
+│   │   ├── email_feliz_natal.txt
+│   └── emails_produtivos/
+│       ├── email_anexo.txt
+│       ├── email_financeiro.txt
+│       ├── email_status.txt
+│       ├── email_statusII.txt
+│       ├── email_suporte.txt
+│       └── email_anexo.pdf       # (placeholder explicativo)
 ├── .env.example
 ├── Dockerfile
 ├── LICENSE
@@ -96,8 +105,8 @@ AutoU-Email-Assistant/
 
 ## 🧪 Dados de exemplo
 
-- `sample_data/email_status.txt` — solicita status/protocolo → **Produtivo** (Status)
-- `sample_data/email_feliz_natal.txt` — felicitações → **Improdutivo**
+- `sample_data/emails_produtivos/email_status.txt` — solicita status/protocolo → **Produtivo** (Status)
+- `sample_data/emails_improdutivos/email_feliz_natal.txt` — felicitações → **Improdutivo**
 
 ---
 
