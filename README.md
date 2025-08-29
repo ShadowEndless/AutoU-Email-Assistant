@@ -94,26 +94,6 @@ AutoU-Email-Assistant/
 └── requirements.txt
 ```
 
----
-
-## 🎥 Roteiro para o Vídeo (3–5 min)
-
-1. **Introdução (30s)**  
-   - Seu nome + objetivo do case.
-2. **Demonstração (3 min)**  
-   - Abrir a UI → colar um email → processar → ver categoria e resposta.  
-   - Mostrar upload `.txt` e `.pdf`.  
-   - (Se houver) Ativar “Usar IA da nuvem” e comparar resultados.
-3. **Técnico (1 min)**  
-   - FastAPI + HTML, Regras + (opcional) Inference API, templates de resposta.  
-   - Decisões: fallback offline, leve e barato para cloud free-tier.
-4. **Conclusão (30s)**  
-   - O que foi feito, como evoluir (treinar modelo próprio, basear em histórico real, feedback loop).
-
-> Um exemplo completo está em `VIDEO_SCRIPT.md` com sugestão de falas.
-
----
-
 ## 🧪 Dados de exemplo
 
 - `sample_data/email_status.txt` — solicita status/protocolo → **Produtivo** (Status)
@@ -129,7 +109,7 @@ AutoU-Email-Assistant/
 
 ---
 
-## 🛣️ Próximos Passos (idéias)
+## 🛣️ Minhas ideais para próximos Passos
 
 - Treinar um classificador supervisionado com base real.
 - Ajustar prompts/temperatura do gerador.
@@ -137,5 +117,3 @@ AutoU-Email-Assistant/
 - Fila e *rate limit*; dashboards; *feedback loop* com clique “Essa resposta ajudou?”.
 
 ---
-
-MIT © 2025
