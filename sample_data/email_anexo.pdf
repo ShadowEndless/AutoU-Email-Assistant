@@ -1,0 +1,3 @@
+Este é um placeholder. Para testar PDF:
+- Crie um PDF com qualquer texto (ex.: exporte um .txt como .pdf) e faça o upload na interface.
+- O backend usa pypdf para extrair o texto e processar normalmente.

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AutoU Email Assistant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <div class="max-w-3xl mx-auto py-10 px-4">
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold">AutoU Email Assistant</h1>
+      <p class="text-slate-600">Classifique emails (Produtivo/Improdutivo) e gere respostas automáticas.</p>
+    </header>
+
+    <section class="bg-white rounded-2xl shadow p-6 space-y-4">
+      <div class="space-y-2">
+        <label class="font-medium">Cole o texto do e-mail</label>
+        <textarea id="emailText" class="w-full h-40 p-3 border rounded-xl focus:outline-none focus:ring" placeholder="Cole aqui o conteúdo do e-mail..."></textarea>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div>
+          <label for="file" class="block font-medium">Ou envie um arquivo (.txt/.pdf)</label>
+          <input id="file" type="file" accept=".txt,.pdf" class="block text-sm" />
+        </div>
+
+        <label class="inline-flex items-center gap-2 ml-auto cursor-pointer">
+          <input id="useLLM" type="checkbox" class="h-4 w-4" />
+          <span class="text-sm text-slate-700">Usar IA da nuvem (se configurada)</span>
+        </label>
+      </div>
+
+      <div class="flex gap-3">
+        <button id="btnProcess" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50">Processar</button>
+        <button id="btnClear" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300">Limpar</button>
+        <button id="btnSampleProd" class="ml-auto px-3 py-2 text-sm rounded-lg bg-emerald-100 hover:bg-emerald-200">Exemplo Produtivo</button>
+        <button id="btnSampleUnprod" class="px-3 py-2 text-sm rounded-lg bg-amber-100 hover:bg-amber-200">Exemplo Improdutivo</button>
+      </div>
+    </section>
+
+    <section id="result" class="mt-6 hidden">
+      <div class="bg-white rounded-2xl shadow p-6 space-y-4">
+        <div class="flex items-center gap-2">
+          <span id="badge" class="px-2 py-1 text-xs font-semibold rounded-full"></span>
+          <span id="subtype" class="text-sm text-slate-600"></span>
+          <span id="confidence" class="ml-auto text-sm text-slate-500"></span>
+        </div>
+        <div>
+          <h3 class="font-medium mb-1">Resposta sugerida</h3>
+          <div class="relative">
+            <pre id="reply" class="whitespace-pre-wrap bg-slate-50 border rounded-xl p-3 text-sm"></pre>
+            <button id="btnCopy" class="absolute top-2 right-2 px-2 py-1 text-xs rounded-md bg-slate-200 hover:bg-slate-300">Copiar</button>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-medium mb-1">Explicações</h4>
+          <ul id="reasons" class="list-disc list-inside text-sm text-slate-600 space-y-1"></ul>
+        </div>
+      </div>
+    </section>
+
+    <footer class="mt-10 text-center text-xs text-slate-500">
+    </footer>
+  </div>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const emailText = $("#emailText");
+    const fileInput = $("#file");
+    const useLLM = $("#useLLM");
+    const btnProcess = $("#btnProcess");
+    const btnClear = $("#btnClear");
+    const btnSampleProd = $("#btnSampleProd");
+    const btnSampleUnprod = $("#btnSampleUnprod");
+    const result = $("#result");
+    const badge = $("#badge");
+    const subtype = $("#subtype");
+    const confidence = $("#confidence");
+    const reply = $("#reply");
+    const reasons = $("#reasons");
+    const btnCopy = $("#btnCopy");
+
+    btnSampleProd.addEventListener("click", () => {
+      emailText.value = "Bom dia, poderiam informar o status do meu chamado? Protocolo #12345. Estou com dificuldade de acesso desde ontem. Obrigado.";
+    });
+    btnSampleUnprod.addEventListener("click", () => {
+      emailText.value = "Olá, bom dia! Passando para desejar um feliz natal e um excelente ano novo para toda a equipe. Abraços!";
+    });
+    btnClear.addEventListener("click", () => {
+      emailText.value = "";
+      fileInput.value = "";
+      result.classList.add("hidden");
+    });
+
+    btnProcess.addEventListener("click", async () => {
+      btnProcess.disabled = true;
+      reasons.innerHTML = "";
+      badge.textContent = "Processando...";
+      badge.className = "px-2 py-1 text-xs font-semibold rounded-full bg-slate-200";
+      result.classList.remove("hidden");
+
+      const fd = new FormData();
+      if (emailText.value.trim().length > 0) {
+        fd.append("text", emailText.value.trim());
+      }
+      if (fileInput.files.length > 0) {
+        fd.append("file", fileInput.files[0]);
+      }
+      fd.append("use_llm", useLLM.checked ? "true" : "false");
+
+      try {
+        const res = await fetch("/api/classify", { method: "POST", body: fd });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+
+        badge.textContent = data.category;
+        badge.className = "px-2 py-1 text-xs font-semibold rounded-full " + (data.category === "Produtivo" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-800");
+        subtype.textContent = data.subtype !== "outros" ? `subtipo: ${data.subtype}` : "";
+        confidence.textContent = `confiança aprox.: ${data.confidence}`;
+        reply.textContent = data.suggested_reply;
+        reasons.innerHTML = (data.reasons || []).map(x => `<li>${x}</li>`).join("");
+      } catch (e) {
+        badge.textContent = "Erro";
+        badge.className = "px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700";
+        subtype.textContent = "";
+        confidence.textContent = "";
+        reply.textContent = String(e);
+      } finally {
+        btnProcess.disabled = false;
+      }
+    });
+
+    btnCopy.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(reply.textContent);
+      btnCopy.textContent = "Copiado!";
+      setTimeout(() => (btnCopy.textContent = "Copiar"), 1200);
+    });
+  </script>
+</body>
+</html>
