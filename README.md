@@ -4,7 +4,7 @@ Solução simples (FastAPI + HTML) para **classificar emails** em *Produtivo* ou
 Funciona **100% local** com um **classificador por regras** e pode ficar mais inteligente ao **conectar a API do Hugging Face Inference** (opcional).
 
 > 🇧🇷 **Linguagem:** Interface PT-BR, regras PT/EN.  
-> ⚙️ **Stack:** FastAPI, Vanilla HTML+JS (Tailwind), opcional Hugging Face Inference API.  
+> ⚙️ **Stack:** FastAPI, Vanilla HTML+JS (Tailwind), SQLite, opcional Hugging Face Inference API.  
 > ☁️ **Deploy sugerido:** Render (free).
 
 ---
