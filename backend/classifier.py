@@ -188,42 +188,59 @@ def llm_refine_reply(base_reply: str, text: str, category: str, api_key: str, mo
 # ------------------------ Public API ---------------------------
 
 def classify_email(text: str, use_llm: bool = False) -> Dict[str, Any]:
+    """
+    Classifica um e-mail em 'Produtivo' ou 'Improdutivo', detecta subtipo e sugere resposta.
+    Integração opcional com Hugging Face Zero-Shot e geração de resposta via LLM.
+    """
     text_norm = normalize(text)
+
+    # 1️⃣ Score por regras
     prod, unprod, reasons = score_rules(text_norm)
     subtype = detect_subtype(text_norm)
 
-    # regra básica
+    # 2️⃣ Categoria inicial baseada em regras
     category = "Produtivo" if prod >= unprod else "Improdutivo"
     confidence = float(abs(prod - unprod) / (prod + unprod + 1e-6))  # 0..1 aprox
 
-    # opcional: melhorar com zero-shot
+    # 3️⃣ Integração opcional Hugging Face
     hf_key = os.getenv("HUGGINGFACE_API_KEY", "").strip()
     zs_model = os.getenv("HF_ZEROSHOT_MODEL", "facebook/bart-large-mnli")
     gen_model = os.getenv("HF_GENERATION_MODEL", "mistralai/Mistral-7B-Instruct-v0.2")
 
     if use_llm and hf_key:
         try:
-            label, score, expl = zeroshoot_label(text_norm, ["Produtivo","Improdutivo"], hf_key, zs_model)
+            # Zero-shot classification
+            label, score, expl = zeroshoot_label(
+                text_norm,
+                ["Produtivo", "Improdutivo"],
+                hf_key,
+                zs_model
+            )
             if label:
-                category = "Produtivo" if label.lower().startswith("produt") else "Improdutivo"
-                confidence = max(confidence, score)
+                # Normaliza label e atualiza categoria/confiança
+                category = label.strip().capitalize()  # garante "Produtivo" ou "Improdutivo"
+                confidence = float(score)  # confiança retornada pelo zero-shot
                 reasons.extend(expl)
         except Exception as e:
             reasons.append(f"Falha HF zero-shot: {e}")
 
+    # 4️⃣ Geração opcional de resposta via LLM
     reply = template_reply(category, subtype, text_norm)
-
     if use_llm and hf_key:
         try:
-            reply = llm_refine_reply(reply, text_norm, category, hf_key, gen_model)
-            reasons.append("Resposta refinada por LLM (HF Inference).")
+            refined = llm_refine_reply(reply, text_norm, category, hf_key, gen_model)
+            if refined:
+                reply = refined
+                reasons.append("Resposta refinada por LLM (HF Inference).")
         except Exception as e:
             reasons.append(f"Falha ao refinar com LLM: {e}")
 
+    # 5️⃣ Resultado final
     return {
         "category": category,
         "confidence": round(confidence, 3),
         "subtype": subtype,
         "suggested_reply": reply,
-        "reasons": reasons[:6]
+        "reasons": reasons[:6]  # limita a 6 explicações
     }
+
