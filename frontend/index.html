@@ -36,6 +36,7 @@
         <button id="btnClear" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300">Limpar</button>
         <button id="btnSampleProd" class="ml-auto px-3 py-2 text-sm rounded-lg bg-emerald-100 hover:bg-emerald-200">Exemplo Produtivo</button>
         <button id="btnSampleUnprod" class="px-3 py-2 text-sm rounded-lg bg-amber-100 hover:bg-amber-200">Exemplo Improdutivo</button>
+        <button id="btnLogs" class="px-4 py-2 rounded-xl bg-slate-300 hover:bg-slate-400 text-sm">Ver Logs</button>
       </div>
     </section>
 
@@ -80,6 +81,12 @@
     const reply = $("#reply");
     const reasons = $("#reasons");
     const btnCopy = $("#btnCopy");
+    const btnLogs = $("#btnLogs");
+
+    btnLogs.addEventListener("click", () => {
+      window.open("/api/logs", "_blank");
+    });
+
 
     btnSampleProd.addEventListener("click", () => {
       emailText.value = "Bom dia, poderiam informar o status do meu chamado? Protocolo #12345. Estou com dificuldade de acesso desde ontem. Obrigado.";
