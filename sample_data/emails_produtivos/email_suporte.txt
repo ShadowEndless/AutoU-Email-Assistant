@@ -1,0 +1,7 @@
+Assunto: Erro ao acessar o portal do cliente
+Corpo:
+Bom dia,
+Estou enfrentando um erro ao tentar realizar login no portal. A página retorna mensagem de falha de autenticação e fica indisponível. Solicito auxílio do suporte para regularizar o acesso.
+
+Atenciosamente,
+Fernanda Souza
